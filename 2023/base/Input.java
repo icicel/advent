@@ -1,3 +1,4 @@
+package base;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -6,7 +7,7 @@ import java.util.stream.Stream;
 
 public class Input {
 
-    public static Stream<String> inputStream(int day) {
+    public static Stream<String> stream(int day) {
         try {
             Path path = FileSystems.getDefault().getPath(".", "input", day + ".txt");
             return Files.lines(path); 
@@ -15,18 +16,18 @@ public class Input {
         }
     }
 
-    public static String inputString(int day) {
+    public static String string(int day) {
         String result = "";
-        try (Stream<String> stream = inputStream(day)) {
+        try (Stream<String> stream = stream(day)) {
             stream.forEach(line -> result.concat(line + "\n"));
         }
         return result;
     }
 
-    public static Iterable<String> inputLines(int day) {
+    public static Iterable<String> lines(int day) {
         return new Iterable<String>() {
             public Iterator<String> iterator() {
-                return inputStream(day).iterator();
+                return stream(day).iterator();
             }
         };
     }
