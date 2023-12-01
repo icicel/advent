@@ -1,5 +1,6 @@
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.stream.Stream;
 
@@ -7,7 +8,8 @@ public class Input {
 
     public static Stream<String> inputStream(int day) {
         try {
-            return Files.lines(Paths.get("input", "day" + day + ".txt")); 
+            Path path = FileSystems.getDefault().getPath(".", "input", day + ".txt");
+            return Files.lines(path); 
         } catch (Exception e) {
             return null;
         }
@@ -22,11 +24,9 @@ public class Input {
     }
 
     public static Iterable<String> inputLines(int day) {
-        Iterator<String> iterator = inputStream(day).iterator();
-
         return new Iterable<String>() {
             public Iterator<String> iterator() {
-                return iterator;
+                return inputStream(day).iterator();
             }
         };
     }
