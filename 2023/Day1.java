@@ -1,143 +1,193 @@
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import base.Input;
 
 // Trebuchet!?
+// 54159
+// 53866
 public class Day1 {
-
-    public static final Map<String, Integer> numberWords = new HashMap<>();
-    
     public static void main(String[] args) {
-        numberWords.put("one", 1);
-        numberWords.put("two", 2);
-        numberWords.put("three", 3);
-        numberWords.put("four", 4);
-        numberWords.put("five", 5);
-        numberWords.put("six", 6);
-        numberWords.put("seven", 7);
-        numberWords.put("eight", 8);
-        numberWords.put("nine", 9);
+        Day1 main = new Day1();
+        System.out.println(main.solve1());
+        System.out.println(main.solve2());
+    }
 
-        int sum1 = 0;
-        int sum2 = 0;
+
+
+    public final Map<String, Integer> numwords;
+    public final int numwordMaxLength;
+    public final int numwordMinLength;
+    public final List<Line> lines;
+    
+    public Day1() {
+        numwords = new HashMap<>();
+        numwords.put("one", 1);
+        numwords.put("two", 2);
+        numwords.put("three", 3);
+        numwords.put("four", 4);
+        numwords.put("five", 5);
+        numwords.put("six", 6);
+        numwords.put("seven", 7);
+        numwords.put("eight", 8);
+        numwords.put("nine", 9);
+        numwordMaxLength = 5;
+        numwordMinLength = 3;
+
+        lines = new LinkedList<>();
         for (String line : Input.lines(1)) {
-            sum1 += getValue1(line);
-            sum2 += getValue2(line);
+            lines.add(new Line(line));
         }
-        System.out.println(sum1);
-        System.out.println(sum2);
+
     }
 
-    // Return a number consisting of the first and last digits of a string
-    public static int getValue1(String string) {
-        char first;
-        char last;
-        int i = 0;
-        int j = string.length() - 1;
-
-        do {
-            first = string.charAt(i++);
-        } while (!Character.isDigit(first));
-        do {
-            last = string.charAt(j--);
-        } while (!Character.isDigit(last));
-
-        return 10 * toInt(first) + toInt(last);
-    }
-
-    public static int toInt(char c) {
-        return Character.digit(c, 10);
-    }
-
-    // getValue2 but also count number words as digits
-    public static int getValue2(String string) {
-        String buffer = "";
-        int length = 0;
-        int first;
-        int last;
-        char c;
-        int i = 0;
-        int j = string.length() - 1;
-
-        while (true) {
-            c = string.charAt(i++);
-            first = Character.digit(c, 10);
-            if (first != -1) {
-                break;
-            }
-            buffer += c;
-            length++;
-
-            if (length < 3) {
-                continue;
-            }
-            first = numberWord(buffer.substring(length - 3));
-            if (first != -1) {
-                break;
-            }
-
-            if (length < 4) {
-                continue;
-            }
-            first = numberWord(buffer.substring(length - 4));
-            if (first != -1) {
-                break;
-            }
-
-            if (length < 5) {
-                continue;
-            }
-            first = numberWord(buffer.substring(length - 5));
-            if (first != -1) {
-                break;
-            }
-        };
-
-        buffer = "";
-        length = 0;
-
-        while (true) {
-            c = string.charAt(j--);
-            last = Character.digit(c, 10);
-            if (last != -1) {
-                break;
-            }
-            buffer = c + buffer;
-            length++;
-            
-            if (length < 3) {
-                continue;
-            }
-            last = numberWord(buffer.substring(0, 3));
-            if (last != -1) {
-                break;
-            }
-
-            if (length < 4) {
-                continue;
-            }
-            last = numberWord(buffer.substring(0, 4));
-            if (last != -1) {
-                break;
-            }
-
-            if (length < 5) {
-                continue;
-            }
-            last = numberWord(buffer.substring(0, 5));
-            if (last != -1) {
-                break;
-            }
-        };
-
-        return 10 * first + last;
-    }
-
-    public static int numberWord(String string) {
-        if (numberWords.containsKey(string)) {
-            return numberWords.get(string);
+    public int solve1() {
+        int sum = 0;
+        for (Line line : lines) {
+            sum += 10 * line.firstDigit(false, false);
+            sum += line.firstDigit(false, true);
         }
-        return -1;
+        return sum;
+    }
+
+    public int solve2() {
+        int sum = 0;
+        for (Line line : lines) {
+            sum += 10 * line.firstDigit(true, false);
+            sum += line.firstDigit(true, true);
+        }
+        return sum;
+    }
+
+
+
+    // Wrapper for a line
+    public class Line {
+        public final String line;
+
+        public Line(String line) {
+            this.line = line;
+        }
+        
+        // Returns the first digit found by a scanner
+        // If fromRight, return the last digit instead (first from the right)
+        public int firstDigit(boolean includeNumwords, boolean fromRight) {
+            Scanner scanner;
+            if (includeNumwords) {
+                scanner = new NumwordScanner(line, fromRight);
+            } else {
+                scanner = new CharScanner(line, fromRight);
+            }
+            while (true) {
+                int digit = scanner.scan();
+                if (digit != -1) {
+                    return digit;
+                }
+                scanner.step();
+            }
+        }
+    }
+
+
+
+    // Iterable-like that steps through a string one char at a time
+    public interface Scanner {
+
+        // Increment the current char
+        public void step();
+
+        // Checks current char for digits
+        // Returns -1 if not a digit
+        public int scan();
+    }
+
+
+
+    // Simple implementation
+    public class CharScanner implements Scanner {
+        public final boolean reverse;
+        public final String string;
+        public int current;
+
+        public CharScanner(String string, boolean reverse) {
+            this.string = string;
+            this.reverse = reverse;
+
+            current = reverse ? string.length() - 1 : 0;
+        }
+
+        public void step() {
+            if (reverse) {
+                current--;
+            } else {
+                current++;
+            }
+        }
+
+        public int scan() {
+            char currentChar = string.charAt(current);
+            if (Character.isDigit(currentChar)) {
+                return Character.digit(currentChar, 10);
+            }
+            return -1;
+        }
+    }
+
+
+
+    // Scans for both digits and numwords by using a buffer
+    public class NumwordScanner implements Scanner {
+        public final boolean reverse;
+        public final String string;
+        public String buffer;
+        public int current;
+
+        public NumwordScanner(String string, boolean reverse) {
+            this.string = string;
+            this.reverse = reverse;
+
+            if (reverse) {
+                current = string.length() - 1;
+                buffer = string.substring(current);
+            } else {
+                current = 0;
+                buffer = string.substring(0, 1);
+            }
+        }
+
+        public void step() {
+            if (reverse) {
+                current--;
+                buffer = string.charAt(current) + buffer;
+            } else {
+                current++;
+                buffer = buffer + string.charAt(current);
+            }
+        }
+
+        public int scan() {
+            char currentChar = string.charAt(current);
+            if (Character.isDigit(currentChar)) {
+                return Character.digit(currentChar, 10);
+            }
+            // check buffer for numwords of every possible length
+            for (int l = numwordMinLength; l <= numwordMaxLength; l++) {
+                if (buffer.length() < l) {
+                    continue;
+                }
+                String numword;
+                if (reverse) {
+                    numword = buffer.substring(0, l);
+                } else {
+                    numword = buffer.substring(buffer.length() - l);
+                }
+                if (numwords.containsKey(numword)) {
+                    return numwords.get(numword);
+                }
+            }
+            return -1;
+        }
     }
 }
