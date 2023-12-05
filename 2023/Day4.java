@@ -4,8 +4,8 @@ import java.util.List;
 import base.Input;
 
 // Scratchcards
-//
-//
+// 21919
+// 9881048
 public class Day4 {
     public static void main(String[] args) {
         Day4 main = new Day4();
@@ -47,6 +47,7 @@ public class Day4 {
                 currentCopies += copies;
                 cardCopies.set(cardIndex + i, currentCopies);
             }
+            cardCopies.set(cardIndex, 1);
         }
         return sum;
     }
