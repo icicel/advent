@@ -18,8 +18,8 @@ public class Input {
 
     public static String string(int day) {
         String result = "";
-        try (Stream<String> stream = stream(day)) {
-            stream.forEach(line -> result.concat(line + "\n"));
+        for (String line : lines(day)) {
+            result += line + "\n";
         }
         return result;
     }
